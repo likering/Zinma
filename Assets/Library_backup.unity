@@ -676,6 +676,10 @@ MonoBehaviour:
   level: 1
   currentExp: 0
   expToNextLevel: 100
+  maxHp: 100
+  currentHp: 0
+  attackPower: 10
+  defensePower: 5
 --- !u!114 &678015107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -697,7 +701,7 @@ MonoBehaviour:
   attackDamage: 25
   enemyLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
 --- !u!54 &678015108
 Rigidbody:
   m_ObjectHideFlags: 0

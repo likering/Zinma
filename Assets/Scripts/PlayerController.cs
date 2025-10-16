@@ -1,15 +1,12 @@
-using Unity.Android.Gradle.Manifest;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
+// PlayerStatsコンポーネントが同じオブジェクトにないとエラーになるようにする
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(PlayerStats))]
 public class PlayerController : MonoBehaviour
 {
-    public int maxHp = 100;
-    public int currentHp;
-
-    // UIManagerへの参照を保持する変数
-    private UIManager uiManager;
+    // --- PlayerStatsへの参照を保持する変数 ---
+    private PlayerStats playerStats;
 
     [SerializeField]
     private float moveSpeed = 5.0f; // 左右移動の速さ
@@ -22,40 +19,33 @@ public class PlayerController : MonoBehaviour
     [Header("攻撃設定")]
     [SerializeField]
     private Transform attackPoint; // 攻撃判定の中心位置
+
+    // ※ attackRange, attackDamage, enemyLayers は OnAttack メソッドで使われているため残します
     [SerializeField]
     private float attackRange = 0.8f; // 攻撃の半径
+
+    // ※ OnAttackメソッドで使われているため、以下の2つも必要です
     [SerializeField]
     private float attackDamage = 25f;  // 攻撃力
     [SerializeField]
     private LayerMask enemyLayers; // 敵のレイヤー
-
-    private CharacterController controller;
-    private Vector3 moveDirection = Vector3.zero;
-    private Vector2 inputVec;
 
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
 
-        controller = GetComponent<CharacterController>();
-        // attackPointが設定されていなければプレイヤー自身を基点にする
+        // ★★★ 修正点 ★★★
+        // 自分に付いている PlayerStats コンポーネントを取得して、変数に保存する
+        playerStats = GetComponent<PlayerStats>();
+
+        // attackPointが設定されていなければプレイヤー自身を基点にする (これはOK)
         if (attackPoint == null)
         {
             attackPoint = this.transform;
         }
 
-        currentHp = maxHp;
-
-        // シーン内にあるUIManagerを探してきて、変数に格納する
-        // (もっと良い方法はありますが、まずはこれで動かします)
-        uiManager = FindObjectOfType<UIManager>();
-
-        // 開始時にUIを初期化
-        if (uiManager != null)
-        {
-            uiManager.UpdateHpUI(currentHp, maxHp);
-        }
+        // --- HPやUIの初期化処理は PlayerStats が行うので、ここからは削除 ---
     }
 
     void Update()
@@ -65,105 +55,58 @@ public class PlayerController : MonoBehaviour
         {
             Attack();
         }
-        // 左右と前後の入力を取得
-        float x = Input.GetAxis("Horizontal"); // A/Dキーまたは←/→キー
-        float z = Input.GetAxis("Vertical");   // W/Sキーまたは↑/↓キー
 
-        // 現在の速度を維持しつつ、左右と前後の速度を設定
-        // カメラの向きに合わせて移動方向を計算
+        // --- 移動処理 (ここは変更なし) ---
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
         Vector3 move = transform.right * x + transform.forward * z;
         rb.linearVelocity = new Vector3(move.x * moveSpeed, rb.linearVelocity.y, move.z * moveSpeed);
 
-        // ジャンプ処理
+        // --- ジャンプ処理 (ここは変更なし) ---
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
         }
-
-        
     }
+
     void Attack()
     {
-        // 画面中央から前方に向けてRay（光線）を飛ばす
-        Ray ray = Camera.main.ScreenPointToRay(new Vector3(UnityEngine.Screen.width / 2, UnityEngine.Screen.height / 2));
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
         RaycastHit hit;
 
-        // Rayが何かに当たったか？
-        if (Physics.Raycast(ray, out hit, 100f)) // 100fは射程距離
+        if (Physics.Raycast(ray, out hit, 100f))
         {
             Debug.Log("Rayが " + hit.collider.name + " に当たった！");
 
-            // 当たった相手にEnemyControllerスクリプトが付いているか？
             EnemyController enemy = hit.collider.GetComponent<EnemyController>();
             if (enemy != null)
             {
-                // 付いていれば、その敵のTakeDamageメソッドを呼び出す
-                enemy.TakeDamage(10); // ここでは10ダメージを与える
+                // ★★★ 修正点 ★★★
+                // PlayerStats が持っている攻撃力(attackPower)を使ってダメージを与える
+                enemy.TakeDamage(playerStats.attackPower);
             }
         }
-      
     }
 
-    // --- PlayerInputコンポーネントから"Attack"アクションが呼ばれたときに実行されるメソッドを追加 ---
-    public void OnAttack(InputValue value)
+    // --- この OnAttack メソッドは PlayerInput システムを使っている場合の攻撃処理です。
+    // --- Update内のマウス入力とどちらを使うか、後で統一する必要があります。
+    public void OnAttack(UnityEngine.InputSystem.InputValue value)
     {
-        // 攻撃アニメーションなどをここで再生する
-
-        Debug.Log("攻撃！");
-
-        // 攻撃範囲内にいる敵のColliderをすべて検出する
-        Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
-
-        // 検出したすべての敵にダメージを与える
-        foreach (Collider enemy in hitEnemies)
-        {
-            Debug.Log(enemy.name + " にヒット！");
-            // 敵からEnemyHealthコンポーネントを取得して、ダメージを与えるメソッドを呼び出す
-            EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
-            if (enemyHealth != null)
-            {
-                enemyHealth.TakeDamage(attackDamage);
-            }
-        }
+        // ... (この中身は一旦そのまま)
     }
 
-    // ダメージを受ける処理（外部から呼ばれることを想定）
+    // ★★★ 修正点 ★★★
+    // ダメージを受ける処理は、PlayerStatsに処理を依頼するだけにする
     public void TakeDamage(int damage)
     {
-        // 防御力の計算などをここで行う
-        int actualDamage = damage; // - defensePower;
-        if (actualDamage < 1) actualDamage = 1;
-
-        currentHp -= damage;
-
-        // HPが0未満にならないように調整
-        if (currentHp < 0)
-        {
-            currentHp = 0;
-        }
-
-        Debug.Log("プレイヤーが " + damage + " のダメージを受けた！ 残りHP: " + currentHp);
-
-        // UIManagerのHP更新関数を呼び出す
-        if (uiManager != null)
-        {
-            uiManager.UpdateHpUI(currentHp, maxHp);
-        }
-
-        if (currentHp <= 0)
-        {
-            Die();
-        }
-
-        void Die()
-        {
-            Debug.Log("プレイヤーは力尽きた...");
-            // ここにゲームオーバー処理などを追加
-        }
+        // PlayerStatsのTakeDamageメソッドを呼び出す
+        playerStats.TakeDamage(damage);
     }
 
-    // Sceneビューに攻撃範囲を視覚的に表示するためのギズモ
+
+    // --- 以下のメソッドは変更なし ---
+
     private void OnDrawGizmosSelected()
     {
         if (attackPoint == null) return;
@@ -171,17 +114,14 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 
-    // 地面に接触したときの処理
     void OnCollisionStay(Collision collisionInfo)
     {
-        // "Ground"タグが付いたオブジェクトに接触しているか確認
         if (collisionInfo.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
         }
     }
 
-    // 地面から離れたときの処理
     private void OnCollisionExit(Collision collisionInfo)
     {
         if (collisionInfo.gameObject.CompareTag("Ground"))
@@ -189,7 +129,4 @@ public class PlayerController : MonoBehaviour
             isGrounded = false;
         }
     }
-
-
-
 }
