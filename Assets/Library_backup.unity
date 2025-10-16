@@ -132,6 +132,18 @@ PrefabInstance:
       value: Latina
       objectReference: {fileID: 0}
     - target: {fileID: 4000011713068534, guid: b94b7fbd4453eb04b89e1e2cd1d51a2c, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000011713068534, guid: b94b7fbd4453eb04b89e1e2cd1d51a2c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000011713068534, guid: b94b7fbd4453eb04b89e1e2cd1d51a2c, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000011713068534, guid: b94b7fbd4453eb04b89e1e2cd1d51a2c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -558,10 +570,10 @@ GameObject:
   - component: {fileID: 678015105}
   - component: {fileID: 678015104}
   - component: {fileID: 678015103}
-  - component: {fileID: 678015102}
   - component: {fileID: 678015108}
   - component: {fileID: 678015107}
   - component: {fileID: 678015106}
+  - component: {fileID: 678015109}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -569,29 +581,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!136 &678015102
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 678015101}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &678015103
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -654,7 +643,7 @@ Transform:
   m_GameObject: {fileID: 678015101}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5, y: 2, z: 5}
+  m_LocalPosition: {x: 9.05, y: 2.31, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -673,9 +662,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86753a738a92d194e8d4ac870add73f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 1
-  currentExp: 0
-  expToNextLevel: 100
+  currentLevel: 1
+  currentExperience: 0
+  experienceForNextLevel: 100
   maxHp: 100
   currentHp: 0
   attackPower: 10
@@ -692,8 +681,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13a3600352220d34f93ba8cd3d407e7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 100
-  currentHp: 0
   moveSpeed: 5
   jumpForce: 8
   attackPoint: {fileID: 0}
@@ -729,6 +716,29 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!136 &678015109
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 678015101}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.20395684
+  m_Height: 0.7095194
+  m_Direction: 1
+  m_Center: {x: -0.019737482, y: 0.67297745, z: 0}
 --- !u!1001 &1297666987
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -740,6 +750,18 @@ PrefabInstance:
     - target: {fileID: 121574, guid: fe2a5bf9b4c2d4a4b9853a8506f18c40, type: 3}
       propertyPath: m_Name
       value: TT_RTS_Demo_Character
+      objectReference: {fileID: 0}
+    - target: {fileID: 416546, guid: fe2a5bf9b4c2d4a4b9853a8506f18c40, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 416546, guid: fe2a5bf9b4c2d4a4b9853a8506f18c40, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 416546, guid: fe2a5bf9b4c2d4a4b9853a8506f18c40, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 416546, guid: fe2a5bf9b4c2d4a4b9853a8506f18c40, type: 3}
       propertyPath: m_LocalPosition.x
@@ -831,9 +853,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 2
+  m_Height: 1.1371117
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1.4492102, z: 0}
 --- !u!23 &1376611157
 MeshRenderer:
   m_ObjectHideFlags: 0

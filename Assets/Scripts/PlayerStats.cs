@@ -11,7 +11,7 @@ public class PlayerStats : MonoBehaviour
     public int maxHp = 100;
     public int currentHp;
     public int attackPower = 10;
-    // public int defensePower = 5; // 必要に応じて防御力なども追加
+    public int defensePower = 5; // 必要に応じて防御力なども追加
 
     [Header("関連コンポーネント")]
     private UIManager uiManager; // UIを更新するための参照
@@ -53,6 +53,7 @@ public class PlayerStats : MonoBehaviour
         // 例：最大HPが20、攻撃力が5上昇する
         maxHp += 20;
         attackPower += 5;
+        defensePower += 1;
 
         // HPを全回復させる
         currentHp = maxHp;
@@ -61,7 +62,7 @@ public class PlayerStats : MonoBehaviour
         experienceForNextLevel = Mathf.RoundToInt(experienceForNextLevel * 1.2f);
 
         Debug.Log("レベルアップ！ レベル " + currentLevel + " になった！");
-        Debug.Log("最大HP: " + maxHp + ", 攻撃力: " + attackPower);
+        Debug.Log("最大HP: " + maxHp + ", 攻撃力: " + attackPower+", 防御力: " + defensePower +"に上がった " );
 
         // UIを更新
         if (uiManager != null)
