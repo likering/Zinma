@@ -12,10 +12,13 @@ public class EnemyController : MonoBehaviour
     private PlayerStats playerStats; // プレイヤーのステータス管理スクリプト
     private bool isDead;
     private bool isDamage;
-    private AudioSource audioSource;
-    public AudioClip seDamage;
+    
     public GameObject Body; // 点滅させるメッシュを持つGameObject
     private bool isInvincible = false;
+
+    public AudioSource audioSource;
+    public AudioClip seDamage;
+    public AudioClip sedeath;
 
 
     void Start()
@@ -49,7 +52,7 @@ public class EnemyController : MonoBehaviour
         if (isDead || isDamage) return;
 
         // ダメージSEを再生
-        audioSource.PlayOneShot(seDamage);
+        audioSource.PlayOneShot(sedeath);
 
         isDamage = true;
         enemyHP -= damage;
@@ -81,7 +84,8 @@ public class EnemyController : MonoBehaviour
         {
             // 死亡処理を開始
             isDead = true; // 死亡状態にする（重要）
-
+            yield return new WaitForSeconds(1.0f);
+            audioSource.PlayOneShot(seDamage);
             Die();
             yield break; // Dieの中でDestroyするので、このコルーチンはここで終わり
 
