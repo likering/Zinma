@@ -1,4 +1,5 @@
 using System;          // TextMeshProを使うために必要
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI; // Imageを使うために必要
@@ -14,12 +15,18 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI attackText;
     public TextMeshProUGUI defenseText;
 
+    [Header("メッセージウィンドウ")]
+    public GameObject messageWindowPanel;
+    public TextMeshProUGUI messageText;
+
     private PlayerStats playerStats; // PlayerStatsへの参照
 
     // Inspectorから装備品UIのパネルを割り当てる
     public GameObject equipmentPanel;
     // Inspectorからカメラのオブジェクトを割り当てる
     public CameraCotroller cameraController;
+    public InventoryUI inventoryUI;
+
 
     // 外部から呼び出されるHP更新用の関数
     public void UpdateHpUIText(int currentLevel,int currentHp, int maxHp )
@@ -75,8 +82,19 @@ public class UIManager : MonoBehaviour
                 UpdateStatusUI(); // 表示する瞬間に必ず最新情報に更新
             }
         }
-    }
 
+        // Input.GetKeyDownは、キーが「押された瞬間」に一度だけtrueになる
+        // 例：Iキー、または Tabキーが押されたら
+        if (Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Tab))
+        {
+            // InventoryUIスクリプトが設定されていれば
+            if (inventoryUI != null)
+            {
+                // InventoryUIのToggleInventory()メソッドを呼び出す
+                inventoryUI.ToggleInventory();
+            }
+        }
+    }
     // ステータスUIを更新するメソッド
     public void UpdateStatusUI()
     {
@@ -84,6 +102,28 @@ public class UIManager : MonoBehaviour
 
         attackText.text = $"攻撃力: {playerStats.CurrentAttack}";
         defenseText.text = $"防御力: {playerStats.CurrentDefense}";
+    }
+
+    // 外部からメッセージ表示を依頼するためのメソッド
+    public void ShowMessage(string message)
+    {
+        // 既存のメッセージ表示コルーチンが動いていたら停止する
+        StopAllCoroutines();
+        StartCoroutine(ShowMessageCoroutine(message));
+    }
+
+    // メッセージを一定時間表示して消すコルーチン
+    private IEnumerator ShowMessageCoroutine(string message)
+    {
+        // 1. ウィンドウを表示してテキストを設定
+        messageWindowPanel.SetActive(true);
+        messageText.text = message;
+
+        // 2. 指定した秒数だけ待つ (例: 3秒)
+        yield return new WaitForSeconds(3.0f);
+
+        // 3. ウィンドウを非表示にする
+        messageWindowPanel.SetActive(false);
     }
 
     public void OpenEquipmentUI()

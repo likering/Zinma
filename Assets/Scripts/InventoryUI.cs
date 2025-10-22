@@ -8,7 +8,7 @@ public class InventoryUI : MonoBehaviour
 
     [Header("UIパーツ")]
     public GameObject inventoryPanel;
-    public Transform itemContent; // ScrollViewのContent
+    public Transform itemContent; // アイテムボタンを並べる親オブジェクトScrollViewのContent
     public GameObject inventoryItemPrefab; // リストに並べるアイテムボタンのプレハブ
 
     public GameObject itemDetailPanel;
@@ -71,6 +71,9 @@ public class InventoryUI : MonoBehaviour
     // UIのリストを更新する
     void UpdateUI()
     {
+        // ★★★ デバッグログを追加 ★★★
+        Debug.Log("インベントリのアイテム数: " + playerInventory.items.Count);
+
         // 既存のアイテムリストを一旦すべて削除
         foreach (Transform child in itemContent)
         {
@@ -79,14 +82,21 @@ public class InventoryUI : MonoBehaviour
         // インベントリのアイテムスロットを元にリストを再生成
         foreach (InventorySlot slot in playerInventory.items)
         {
-
+            //  プレハブから新しいアイテムボタンのクローンを生成する
+            //     第2引数に itemContent を指定することで、生成と同時にContentの子要素になる
             GameObject itemObj = Instantiate(inventoryItemPrefab, itemContent);
 
-            // ボタンのテキストにアイテム名と個数を表示
-            itemObj.GetComponentInChildren<TextMeshProUGUI>().text = $"{slot.item.ItemName} x{slot.count}";
+            // (b) 生成したボタンの見た目を、アイテム情報に合わせて設定する
+            //     GetComponentInChildrenで子要素のコンポーネントを探してくる
+            //     (プレハブの構造に合わせて、探す対象のコンポーネントを調整してください)
+            Image iconImage = itemObj.transform.Find("ItemIcon").GetComponent<Image>(); // 例: ItemIconという名前の子オブジェクトからImageを取得
+            TextMeshProUGUI nameText = itemObj.GetComponentInChildren<TextMeshProUGUI>(); // TextMeshProを1つしか使っていないならこれでOK
 
-            // ★★★ 最重要ポイント ★★★
-            // このボタンがクリックされたら、OnItemSelectedメソッドを、このslotの情報で呼び出すように設定
+            iconImage.sprite = slot.item.Icon;
+            nameText.text = $"{slot.item.ItemName} x{slot.count}";
+
+            // (c) 生成したボタンに、クリックされた時の動作を登録する
+            //     「このボタンが押されたら、このslotの情報でOnItemSelectedメソッドを呼んでね」と予約する
             itemObj.GetComponent<Button>().onClick.AddListener(() => OnItemSelected(slot));
         }
     }

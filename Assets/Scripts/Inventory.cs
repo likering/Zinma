@@ -1,4 +1,3 @@
-// Inventory.cs
 using UnityEngine;
 using System.Collections.Generic;
 using System; // Action を使うために必要
@@ -20,6 +19,9 @@ public class InventorySlot
 public class Inventory : MonoBehaviour
 {
     private PlayerStats playerStats;
+    private UIManager uiManager;
+    // ★ どこからでもアクセスできる静的なインスタンス
+    public static Inventory instance;
 
     // ★ アイテムリストが変更されたことをUIに通知するためのイベント
     public event Action OnInventoryChanged;
@@ -30,6 +32,28 @@ public class Inventory : MonoBehaviour
     public PlayerEquipment playerEquipment;
 
     // 【追記2】StartメソッドでPlayerEquipmentを自動で見つけてくる
+
+    void Awake()
+    { 
+        // ★ オブジェクトのIDをログに出して、どのオブジェクトかを特定できるようにする
+        Debug.Log($"Inventory.Awake() 実行中 on GameObject: {gameObject.name}, InstanceID: {gameObject.GetInstanceID()}");
+
+        // ★ シングルトンの設定
+        if (instance == null)
+        {
+            // まだ誰もインスタンスになっていなければ、自分がなる
+            instance = this;
+            // (任意) シーンをまたいでインベントリを維持したい場合
+            // DontDestroyOnLoad(gameObject);
+        }
+        else if(instance != this) // ← この条件が重要
+        {
+            // ★★★ 追跡用ログ ★★★
+            Debug.LogError($"シングルトン競合！ '{this.gameObject.name}' (InstanceID: {this.gameObject.GetInstanceID()}) は、既存の '{instance.gameObject.name}' (InstanceID: {instance.gameObject.GetInstanceID()}) があるため破棄されます。");
+            Destroy(gameObject);
+        }
+    }
+
     void Start()
     {
         playerStats = GetComponent<PlayerStats>();
@@ -44,6 +68,7 @@ public class Inventory : MonoBehaviour
 
     public void AddItem(ItemData item, int count = 1)
     {
+        Debug.Log($"--- AddItem 実行 on InstanceID: {gameObject.GetInstanceID()} ---");
         // (この部分は変更なし)
         InventorySlot existingItem = items.Find(slot => slot.item == item);
 
@@ -75,18 +100,31 @@ public class Inventory : MonoBehaviour
 
             // 装備品だった場合、PlayerEquipmentに装備処理を依頼
             playerEquipment.Equip(equipment);
+            // ★ 装備音を再生
+            AudioManager.instance.PlaySE(AudioManager.instance.itemEquippedSound);
+
             // 装備したので、インベントリからアイテムを1つ減らす
             RemoveItem(item, 1);
+        }
+
+        if (item.Type == ItemType.Potion)
+        {
+            // ポーションだった場合、プレイヤーのHPを回復
+            playerStats.Heal(item.Power);
+            Debug.Log(item.ItemName + " を使ってHPが " + item.Power + " 回復した！");
+            uiManager.ShowMessage($"{item.ItemName} を使った！\nHPが {item.Power} 回復した！");
+            // ★ アイテム使用音を再生
+            AudioManager.instance.PlaySE(AudioManager.instance.itemUsedSound);
+            RemoveItem(item, 1);
+
+
         }
         else
         {
             // ★★★ デバッグ用のログを追加 ★★★
             Debug.Log("このアイテムは EquipmentData ではありません。消費アイテムとして処理します。");
 
-            // 装備品でなければ、ポーションなどの消費アイテムとして扱う
-            Debug.Log(item.ItemName + " を使った！（ここに回復などの処理を記述）");
-            // 使ったので、インベントリからアイテムを1つ減らす
-            RemoveItem(item, 1);
+            
         }
     }
 
@@ -116,4 +154,12 @@ public class Inventory : MonoBehaviour
         // ★ 処理の最後にイベントを呼び出す
         OnInventoryChanged?.Invoke();
     }
+
+    // ★ オブジェクトが破棄される時に呼ばれる
+    void OnDestroy()
+    {
+        Debug.LogError($"!!! Inventoryが破棄されました on GameObject: {gameObject.name}, InstanceID: {gameObject.GetInstanceID()} !!!");
+    }
+
+    
 }

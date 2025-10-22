@@ -17,4 +17,5 @@ MonoBehaviour:
   icon: {fileID: 0}
   description: "\u4F53\u529B\u3092\uFF15\uFF10\u56DE\u5FA9\u3059\u308B"
   power: 50
+  hpRecoveryAmount: 50
   price: 0

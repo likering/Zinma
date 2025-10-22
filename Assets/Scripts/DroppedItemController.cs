@@ -29,11 +29,22 @@ public class DroppedItemController : MonoBehaviour
         {
             // すぐにフラグを立てて、他のプレイヤーや複数回の接触で何度も呼ばれるのを防ぐ
             isPickedUp = true;
-            // ★ここにプレイヤーのインベントリにアイテムを追加する処理を書く★
-            Debug.Log(itemData.ItemName + " を拾った！");
+            if (Inventory.instance != null)
+            {
+                // GameManagerにある唯一のInventoryにアイテムを追加
+                Inventory.instance.AddItem(itemData, 1);
 
-            // 音を再生し、その後にオブジェクトを消すコルーチンを開始する
-            StartCoroutine(PickupSequence());
+                // 拾ったログ
+                Debug.Log(itemData.ItemName + " を拾った！");
+
+                StartCoroutine(PickupSequence());
+            }
+            else
+            {
+                Debug.LogError("Inventory.instanceが見つかりません！ GameManagerがシーンに存在するか確認してください。");
+                isPickedUp = false;
+            }
+
         }
     }
     private IEnumerator PickupSequence()
