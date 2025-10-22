@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 1057709340675944361}
   - component: {fileID: 5156014768310821560}
   - component: {fileID: 6597645587590739663}
+  - component: {fileID: 7045589806154352526}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -135,7 +136,7 @@ MonoBehaviour:
   moveSpeed: 5
   jumpForce: 8
   attackPoint: {fileID: 0}
-  attackRange: 0.8
+  attackRange: 1
   attackDamage: 25
   enemyLayers:
     serializedVersion: 2
@@ -160,9 +161,24 @@ MonoBehaviour:
   currentExperience: 0
   experienceForNextLevel: 100
   maxHp: 100
-  currentHp: 0
+  currentHp: 100
   attackPower: 10
   defensePower: 5
+  OnHealthChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: UpdateHpUIText
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!136 &1057709340675944361
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -305,6 +321,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7045589806154352526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5718037399048283888}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3817f1890d36c384f8522157c59a8779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &442013586052422742
 PrefabInstance:
   m_ObjectHideFlags: 0

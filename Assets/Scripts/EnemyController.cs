@@ -1,4 +1,6 @@
+using NUnit.Framework.Interfaces;
 using System.Collections;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Audio;
@@ -12,13 +14,17 @@ public class EnemyController : MonoBehaviour
     private PlayerStats playerStats; // プレイヤーのステータス管理スクリプト
     private bool isDead;
     private bool isDamage;
-    
+
     public GameObject Body; // 点滅させるメッシュを持つGameObject
     private bool isInvincible = false;
 
     public AudioSource audioSource;
     public AudioClip seDamage;
-    public AudioClip sedeath;
+    public AudioClip seDeath;
+
+    [Header("ドロップ設定")]
+    [SerializeField] private IDroppable dropTable; // この敵が使用するドロップテーブル
+    [SerializeField] private GameObject droppedItemPrefab; // ステップ3で作成したプレハブ
 
 
     void Start()
@@ -52,7 +58,7 @@ public class EnemyController : MonoBehaviour
         if (isDead || isDamage) return;
 
         // ダメージSEを再生
-        audioSource.PlayOneShot(sedeath);
+        audioSource.PlayOneShot(seDamage);
 
         isDamage = true;
         enemyHP -= damage;
@@ -84,14 +90,15 @@ public class EnemyController : MonoBehaviour
         {
             // 死亡処理を開始
             isDead = true; // 死亡状態にする（重要）
+            audioSource.PlayOneShot(seDeath);
             yield return new WaitForSeconds(1.0f);
-            audioSource.PlayOneShot(seDamage);
+
             Die();
             yield break; // Dieの中でDestroyするので、このコルーチンはここで終わり
 
         }
         isDamage = false;
-    }    
+    }
 
 
     void Die()
@@ -118,9 +125,13 @@ public class EnemyController : MonoBehaviour
             if (randomValue <= lootItem.dropChance)
             {
                 // ★ アイテムをシーン上に生成する（別途ドロップアイテム用のPrefabが必要）
-                // ここでは簡略化のため、コンソールに表示するだけ
+                // プレハブから新しいGameObjectを生成
+                GameObject itemObject = Instantiate(droppedItemPrefab, transform.position, Quaternion.identity);
+
+                // 生成したオブジェクトのスクリプトを取得し、アイテム情報を設定する
+                itemObject.GetComponent<DroppedItemController>().Initialize(lootItem.item);
                 Debug.Log(lootItem.item.ItemName + " をドロップしました！");
-                // TODO: 実際にアイテムを生成してプレイヤーが拾えるようにする
+                //  実際にアイテムを生成してプレイヤーが拾えるようにする
             }
         }
     }

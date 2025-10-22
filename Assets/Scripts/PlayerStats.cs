@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class PlayerStats : MonoBehaviour
     [Header("関連コンポーネント")]
     private UIManager uiManager; // UIを更新するための参照
 
+    // イベントの型を <現在のHP, 最大HP> に変更
+    public UnityEvent<int, int> OnHealthChanged;
+
     void Awake()
     {
         // 自分と同じGameObjectについているPlayerEquipmentを取得
@@ -41,9 +45,11 @@ public class PlayerStats : MonoBehaviour
         if (uiManager != null)
         {
             // 開始時にUIを初期化
-            uiManager.UpdateHpUI(currentHp, maxHp);
+            uiManager.UpdateHpUIText(currentHp, maxHp);
             // uiManager.UpdateLevelUI(currentLevel); // レベル表示用のUIメソッドがあれば呼び出す
         }
+
+
     }
 
     // ステータスを再計算するメソッド
@@ -93,10 +99,12 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("レベルアップ！ レベル " + currentLevel + " になった！");
         Debug.Log("最大HP: " + maxHp + ", 攻撃力: " + attackPower+", 防御力: " + defensePower +"に上がった " );
 
+        UpdateStatus();
+
         // UIを更新
         if (uiManager != null)
         {
-            uiManager.UpdateHpUI(currentHp, maxHp);
+            uiManager.UpdateHpUIText(currentHp, maxHp);
             // uiManager.UpdateLevelUI(currentLevel); // レベル表示用のUIメソッドがあれば呼び出す
         }
     }
@@ -113,10 +121,15 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log("プレイヤーが " + actualDamage + " のダメージを受けた！ 残りHP: " + currentHp);
 
+        // ↓ このログがコンソールに出るか確認
+        Debug.Log($"HP変更イベント発行: 現在HP={currentHp}, 最大HP={maxHp}");
+        OnHealthChanged.Invoke(currentHp, maxHp);
+
+
         // UIを更新
         if (uiManager != null)
         {
-            uiManager.UpdateHpUI(currentHp, maxHp);
+            uiManager.UpdateHpUIText(currentHp, maxHp);
         }
 
         if (currentHp <= 0)

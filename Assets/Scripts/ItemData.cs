@@ -12,6 +12,7 @@ public enum ItemType
 
 public class ItemData : ScriptableObject
 {
+    internal readonly Sprite itemIcon;
     [SerializeField] private string itemName;         // アイテム名
     [SerializeField] private ItemType itemType;       // アイテムの種類
     [SerializeField] private Sprite icon;             // アイコン

@@ -15,5 +15,8 @@ MonoBehaviour:
   monsterName: "\u30BE\u30F3\u30D3"
   maxHp: 20
   attackPower: 5
-  experiencePoint: 50
-  lootTable: []
+  experiencePoint: 120
+  lootTable:
+  - item: {fileID: 11400000, guid: 79ceacf34554cbf4aa6ec7251f124034, type: 2}
+    dropChance: 100
+  dropRate: 0.506

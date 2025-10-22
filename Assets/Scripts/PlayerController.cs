@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
     public ParticleSystem slashEffect;
     // ① 音を鳴らすためのAudioSourceコンポーネントを格納する変数
     public AudioSource audioSource;
-
+    
     public AudioClip attackSound;
 
     public MeleeWeaponTrail weaponTrail;
@@ -100,6 +100,14 @@ public class PlayerController : MonoBehaviour
             isGrounded = false;
         }
 
+        // テスト用にスペースキーでダメージを受ける
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            TakeDamage(10);
+        }
+
+
         // ★★★ (任意) 移動アニメーションの制御 ★★★
         // animator.SetFloat("Speed", move.magnitude);
     }
@@ -131,7 +139,7 @@ public class PlayerController : MonoBehaviour
             if (enemy != null)
             {
                 // PlayerStats が持っている攻撃力(attackPower)を使ってダメージを与える
-                enemy.TakeDamage(playerStats.attackPower);
+                enemy.TakeDamage(playerStats.CurrentAttack);
             }
         }
     }
