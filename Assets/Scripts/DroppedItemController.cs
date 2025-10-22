@@ -36,7 +36,6 @@ public class DroppedItemController : MonoBehaviour
             StartCoroutine(PickupSequence());
         }
     }
-    // ★★★ 新しいコルーチンを追加 ★★★
     private IEnumerator PickupSequence()
     {
         // まず音を再生する

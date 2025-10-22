@@ -45,7 +45,7 @@ public class PlayerStats : MonoBehaviour
         if (uiManager != null)
         {
             // 開始時にUIを初期化
-            uiManager.UpdateHpUIText(currentHp, maxHp);
+            uiManager.UpdateHpUIText(currentLevel,currentHp, maxHp);
             // uiManager.UpdateLevelUI(currentLevel); // レベル表示用のUIメソッドがあれば呼び出す
         }
 
@@ -97,14 +97,14 @@ public class PlayerStats : MonoBehaviour
         experienceForNextLevel = Mathf.RoundToInt(experienceForNextLevel * 1.2f);
 
         Debug.Log("レベルアップ！ レベル " + currentLevel + " になった！");
-        Debug.Log("最大HP: " + maxHp + ", 攻撃力: " + attackPower+", 防御力: " + defensePower +"に上がった " );
+        Debug.Log("最大HP: " + maxHp + ", 攻撃力: " + attackPower + ", 防御力: " + defensePower + "に上がった ");
 
         UpdateStatus();
 
         // UIを更新
         if (uiManager != null)
         {
-            uiManager.UpdateHpUIText(currentHp, maxHp);
+            uiManager.UpdateHpUIText(currentLevel, currentHp, maxHp);
             // uiManager.UpdateLevelUI(currentLevel); // レベル表示用のUIメソッドがあれば呼び出す
         }
     }
@@ -129,7 +129,7 @@ public class PlayerStats : MonoBehaviour
         // UIを更新
         if (uiManager != null)
         {
-            uiManager.UpdateHpUIText(currentHp, maxHp);
+            uiManager.UpdateHpUIText(currentLevel, currentHp, maxHp);
         }
 
         if (currentHp <= 0)

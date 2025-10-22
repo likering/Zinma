@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
     public ParticleSystem slashEffect;
     // ① 音を鳴らすためのAudioSourceコンポーネントを格納する変数
     public AudioSource audioSource;
-    
+
     public AudioClip attackSound;
 
     public MeleeWeaponTrail weaponTrail;

@@ -3,7 +3,7 @@ using UnityEngine.UI; // Imageを使うために必要
 using TMPro;          // TextMeshProを使うために必要
 
 public class UIManager : MonoBehaviour
-{ 
+{
     // --- インスペクターから設定するUIパーツ ---
     public Image hpBarFill;
     public TextMeshProUGUI hpText;
@@ -14,7 +14,7 @@ public class UIManager : MonoBehaviour
     public CameraCotroller cameraController;
 
     // 外部から呼び出されるHP更新用の関数
-    public void UpdateHpUIText(int currentHp, int maxHp)
+    public void UpdateHpUIText(int currentLevel,int currentHp, int maxHp )
     {
         // ↓ このログがコンソールに出るか確認
         Debug.Log($"UI更新メソッド受信: 現在HP={currentHp}");
@@ -23,7 +23,7 @@ public class UIManager : MonoBehaviour
         hpBarFill.fillAmount = (float)currentHp / maxHp;
 
         // HPテキストを更新
-        hpText.text = $"HP: {currentHp} / {maxHp}";
+        hpText.text = $"Lv: {currentLevel}  HP: {currentHp} / {maxHp}";
     }
     void Start()
     {
