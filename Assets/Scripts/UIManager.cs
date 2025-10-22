@@ -1,12 +1,20 @@
+using System;          // TextMeshProを使うために必要
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI; // Imageを使うために必要
-using TMPro;          // TextMeshProを使うために必要
 
 public class UIManager : MonoBehaviour
 {
     // --- インスペクターから設定するUIパーツ ---
     public Image hpBarFill;
     public TextMeshProUGUI hpText;
+
+    [Header("ステータスUIパーツ")]
+    public GameObject statusPanel;
+    public TextMeshProUGUI attackText;
+    public TextMeshProUGUI defenseText;
+
+    private PlayerStats playerStats; // PlayerStatsへの参照
 
     // Inspectorから装備品UIのパネルを割り当てる
     public GameObject equipmentPanel;
@@ -32,6 +40,14 @@ public class UIManager : MonoBehaviour
         {
             equipmentPanel.SetActive(false);
         }
+        playerStats = FindObjectOfType<PlayerStats>();
+        if (playerStats != null)
+        {
+            // ★★★ 連携の核心 ★★★
+            // PlayerStatsのステータスが更新されたら、UpdateStatusUIを呼ぶようにイベントを登録
+            playerStats.OnStatusChanged += UpdateStatusUI;
+        }
+        statusPanel.SetActive(false); // 最初は非表示
     }
 
     void Update()
@@ -49,6 +65,25 @@ public class UIManager : MonoBehaviour
                 OpenEquipmentUI();
             }
         }
+
+        // Cキーでステータスパネルの表示/非表示を切り替え
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            statusPanel.SetActive(!statusPanel.activeSelf);
+            if (statusPanel.activeSelf)
+            {
+                UpdateStatusUI(); // 表示する瞬間に必ず最新情報に更新
+            }
+        }
+    }
+
+    // ステータスUIを更新するメソッド
+    public void UpdateStatusUI()
+    {
+        if (playerStats == null) return;
+
+        attackText.text = $"攻撃力: {playerStats.CurrentAttack}";
+        defenseText.text = $"防御力: {playerStats.CurrentDefense}";
     }
 
     public void OpenEquipmentUI()
@@ -64,4 +99,6 @@ public class UIManager : MonoBehaviour
         // カメラを再開し、カーソルをロックする
         cameraController.LockCursor();
     }
+
+    
 }

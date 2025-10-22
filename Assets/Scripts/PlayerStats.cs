@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
+using System; // Actionを使うために必要
+
 
 public class PlayerStats : MonoBehaviour
 {
@@ -14,18 +16,20 @@ public class PlayerStats : MonoBehaviour
     public int attackPower = 10;
     public int defensePower = 5; // 必要に応じて防御力なども追加
 
-    // --- 最終的なステータス（基本値 + 装備補正） ---
+    [Header("最終ステータス")]
     public int CurrentAttack { get; private set; }
     public int CurrentDefense { get; private set; }
 
+    [Header("関連コンポーネント")]
     // PlayerEquipmentコンポーネントを保持しておく変数
     private PlayerEquipment playerEquipment;
-
-    [Header("関連コンポーネント")]
     private UIManager uiManager; // UIを更新するための参照
 
     // イベントの型を <現在のHP, 最大HP> に変更
     public UnityEvent<int, int> OnHealthChanged;
+
+    // ★ ステータスが変更されたことを通知するためのイベント
+    public event Action OnStatusChanged;
 
     void Awake()
     {
@@ -51,7 +55,22 @@ public class PlayerStats : MonoBehaviour
 
 
     }
+    public void Heal(int amount)
+    {
+        // 回復後のHPを計算
+        currentHp += amount;
 
+        // もし最大HPを超えていたら、最大HPに補正する
+        if (currentHp > maxHp)
+        {
+            currentHp = maxHp;
+        }
+
+        Debug.Log("HPが " + amount + " 回復した！ 現在のHP: " + currentHp);
+
+        // HPが変更されたことをUIなどに通知する
+        NotifyHpUpdate();
+    }
     // ステータスを再計算するメソッド
     public void UpdateStatus()
     {
@@ -64,6 +83,17 @@ public class PlayerStats : MonoBehaviour
         CurrentDefense = defensePower + defenseBonus;
 
         Debug.Log("ステータス更新: 攻撃力=" + CurrentAttack + ", 防御力=" + CurrentDefense);
+
+        // ★★★ 連携の核心 ★★★
+        // 計算が終わったら、イベントを発行してUIなどに通知
+        OnStatusChanged?.Invoke();
+
+        // ★追記: ステータス更新時に最大HPに変動があったかもしれないのでHPを再評価
+        if (currentHp > maxHp)
+        {
+            currentHp = maxHp;
+        }
+        NotifyHpUpdate();
     }
 
     // 経験値を獲得する
@@ -142,5 +172,20 @@ public class PlayerStats : MonoBehaviour
     {
         Debug.Log("プレイヤーは力尽きた...");
         // ゲームオーバー処理
+    }
+
+    /// </summary>
+    private void NotifyHpUpdate()
+    {
+        // イベントを発行して、HPバーなど他のオブジェクトに通知
+        OnHealthChanged.Invoke(currentHp, maxHp);
+
+        // UIManagerに直接UI更新を依頼
+        if (uiManager != null)
+        {
+            // UpdateHpUIText の引数が3つから2つになったと仮定
+            // もし引数が(レベル, 現在HP, 最大HP)のままなら、元の呼び出し方に戻してください
+            uiManager.UpdateHpUIText(currentLevel, currentHp, maxHp);
+        }
     }
 }

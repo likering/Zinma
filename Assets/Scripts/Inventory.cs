@@ -1,6 +1,7 @@
 // Inventory.cs
 using UnityEngine;
 using System.Collections.Generic;
+using System; // Action を使うために必要
 
 // 所持アイテムとその数を管理するためのクラス
 // (この部分は変更なし)
@@ -18,9 +19,10 @@ public class InventorySlot
 
 public class Inventory : MonoBehaviour
 {
-    // 【追記】テスト用アイテムをインスペクターから設定するための変数
-    [SerializeField] private ItemData testItem1;
-    [SerializeField] private ItemData testItem2;
+    private PlayerStats playerStats;
+
+    // ★ アイテムリストが変更されたことをUIに通知するためのイベント
+    public event Action OnInventoryChanged;
 
     public List<InventorySlot> items = new List<InventorySlot>();
 
@@ -30,9 +32,7 @@ public class Inventory : MonoBehaviour
     // 【追記2】StartメソッドでPlayerEquipmentを自動で見つけてくる
     void Start()
     {
-        // 【追記】ゲーム開始時にテスト用アイテムを追加する
-        if (testItem1 != null) { AddItem(testItem1); }
-        if (testItem2 != null) { AddItem(testItem2); }
+        playerStats = GetComponent<PlayerStats>();
 
         // シーン内からPlayerEquipmentコンポーネントを探してきて、変数に格納する
         playerEquipment = FindObjectOfType<PlayerEquipment>();
@@ -56,7 +56,8 @@ public class Inventory : MonoBehaviour
             items.Add(new InventorySlot(item, count));
         }
         Debug.Log(item.ItemName + " を " + count + "個手に入れた。");
-        // TODO: インベントリUIを更新
+        // ★ 処理の最後にイベントを呼び出す
+        OnInventoryChanged?.Invoke();
     }
 
     // 【追記3】アイテムを消費・装備するためのメソッド
@@ -112,6 +113,7 @@ public class Inventory : MonoBehaviour
         }
 
         Debug.Log(item.ItemName + " を " + count + "個消費/装備しました。");
-        // TODO: インベントリUIを更新
+        // ★ 処理の最後にイベントを呼び出す
+        OnInventoryChanged?.Invoke();
     }
 }
