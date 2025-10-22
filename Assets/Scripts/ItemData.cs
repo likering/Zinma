@@ -1,24 +1,29 @@
 using UnityEngine;
 
-// createAssetMenu を使うと、Unityエディタの右クリックから簡単にデータアセットを作成できる
-[CreateAssetMenu(fileName = "New ItemData", menuName = "RPG/Item Data")]
-public class ItemData : MonoBehaviour
+
+// アイテムの種類を定義するenum（列挙型）
+public enum ItemType
 {
+    Weapon, // 武器
+    Armor,  // 防具
+    Potion, // ポーション
+    Material // 素材
+}
 
-    public string itemName;
-    public Sprite icon;
-    [TextArea]
-    public string description;
-    // 必要に応じて、アイテムの種類（武器、素材、消費アイテムなど）をenumで定義すると便利
+public class ItemData : ScriptableObject
+{
+    [SerializeField] private string itemName;         // アイテム名
+    [SerializeField] private ItemType itemType;       // アイテムの種類
+    [SerializeField] private Sprite icon;             // アイコン
+    [SerializeField][TextArea] private string description; // 説明文
+    [SerializeField] private int power;               // 効果量（攻撃力や回復量など）
+    [SerializeField] private int price;               // 価格
 
-
-void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        
-    }
+    // ゲッター（外部から値を取得するためのプロパティ）
+    public string ItemName => itemName;
+    public ItemType Type => itemType;
+    public Sprite Icon => icon;
+    public string Description => description;
+    public int Power => power;
+    public int Price => price;
 }

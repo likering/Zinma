@@ -13,8 +13,23 @@ public class PlayerStats : MonoBehaviour
     public int attackPower = 10;
     public int defensePower = 5; // 必要に応じて防御力なども追加
 
+    // --- 最終的なステータス（基本値 + 装備補正） ---
+    public int CurrentAttack { get; private set; }
+    public int CurrentDefense { get; private set; }
+
+    // PlayerEquipmentコンポーネントを保持しておく変数
+    private PlayerEquipment playerEquipment;
+
     [Header("関連コンポーネント")]
     private UIManager uiManager; // UIを更新するための参照
+
+    void Awake()
+    {
+        // 自分と同じGameObjectについているPlayerEquipmentを取得
+        playerEquipment = GetComponent<PlayerEquipment>();
+        // ゲーム開始時にステータスを初期計算
+        UpdateStatus();
+    }
 
     void Start()
     {
@@ -29,6 +44,20 @@ public class PlayerStats : MonoBehaviour
             uiManager.UpdateHpUI(currentHp, maxHp);
             // uiManager.UpdateLevelUI(currentLevel); // レベル表示用のUIメソッドがあれば呼び出す
         }
+    }
+
+    // ステータスを再計算するメソッド
+    public void UpdateStatus()
+    {
+        // 装備の合計補正値を取得
+        int attackBonus = playerEquipment.GetTotalAttackBonus();
+        int defenseBonus = playerEquipment.GetTotalDefenseBonus();
+
+        // 基本値と装備補正を合計して最終的なステータスを計算
+        CurrentAttack = attackPower + attackBonus;
+        CurrentDefense = defensePower + defenseBonus;
+
+        Debug.Log("ステータス更新: 攻撃力=" + CurrentAttack + ", 防御力=" + CurrentDefense);
     }
 
     // 経験値を獲得する

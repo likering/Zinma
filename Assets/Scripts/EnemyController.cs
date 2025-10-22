@@ -119,7 +119,7 @@ public class EnemyController : MonoBehaviour
             {
                 // ★ アイテムをシーン上に生成する（別途ドロップアイテム用のPrefabが必要）
                 // ここでは簡略化のため、コンソールに表示するだけ
-                Debug.Log(lootItem.item.itemName + " をドロップしました！");
+                Debug.Log(lootItem.item.ItemName + " をドロップしました！");
                 // TODO: 実際にアイテムを生成してプレイヤーが拾えるようにする
             }
         }

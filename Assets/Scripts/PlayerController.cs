@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour
 
     // ※ attackRange, attackDamage, enemyLayers は OnAttack メソッドで使われているため残します
     [SerializeField]
-    private float attackRange = 0.8f; // 攻撃の半径
+    private float attackRange = 1.0f; // 攻撃の半径
 
     // ※ OnAttackメソッドで使われているため、以下の2つも必要です
     [SerializeField]
@@ -65,7 +65,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // マウスの左クリックを検出
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(1))
         {
             Attack();
         }
@@ -73,7 +73,6 @@ public class PlayerController : MonoBehaviour
         // --- 移動処理 (ここは変更なし) ---
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
-        Debug.Log("入力値 --- x: " + x + ", z: " + z);
         Vector3 move = transform.right * x + transform.forward * z;
         rb.linearVelocity = new Vector3(move.x * moveSpeed, rb.linearVelocity.y, move.z * moveSpeed);
 
@@ -81,7 +80,6 @@ public class PlayerController : MonoBehaviour
         // 0.1fとしているのは、入力の微細なブレを無視するため
         bool isMoving = move.magnitude > 0.1f;
 
-        Debug.Log("isMoving の値: " + isMoving);
 
         // Animatorに移動状態を伝える
         if (animator != null)
