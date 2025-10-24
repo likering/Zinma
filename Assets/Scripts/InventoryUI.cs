@@ -120,6 +120,9 @@ public class InventoryUI : MonoBehaviour
         bool isEquipment = (slot.item.Type == ItemType.Weapon || slot.item.Type == ItemType.Armor);
         equipButton.gameObject.SetActive(isEquipment);
         useButton.gameObject.SetActive(slot.item.Type == ItemType.Potion); // ポーションの時だけ「つかう」
+
+        Debug.Log("選択されたアイテムの種類: " + slot.item.Type);
+        useButton.gameObject.SetActive(slot.item.Type == ItemType.Potion);
     }
 
   

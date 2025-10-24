@@ -64,12 +64,20 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // マウスの左クリックを検出
+        // マウスの右クリックを検出
         if (Input.GetMouseButtonDown(1))
         {
-            Attack();
+            // アニメーショントリガー名: "Attack", ダメージ倍率: 1.0f (通常倍率)
+            PerformAttack("Attack", 1.0f);
         }
 
+        // マウスの左クリックを検出
+        if (Input.GetMouseButtonDown(0))
+        {
+            // PerformAttack を呼び出す
+            // アニメーショントリガー名: "Attack2", ダメージ倍率: 2.0f (2倍)
+            PerformAttack("Attack2", 2.0f);
+        }
         // --- 移動処理 (ここは変更なし) ---
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
@@ -104,7 +112,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            TakeDamage(10);
+            TakeDamage(15);
         }
 
 
@@ -112,38 +120,52 @@ public class PlayerController : MonoBehaviour
         // animator.SetFloat("Speed", move.magnitude);
     }
 
-    void Attack()
+    // ★★★ 新しい統合された攻撃メソッド ★★★
+    void PerformAttack(string triggerName, float damageMultiplier)
     {
-        // ★★★ 修正点 ★★★
-        // Animatorの "Attack" Triggerを起動してアニメーションを再生
+        // 1. 指定されたアニメーショントリガーを起動
         if (animator != null)
         {
-            animator.SetTrigger("Attack");
+            animator.SetTrigger(triggerName);
         }
 
+        // 2. 攻撃判定 (Raycast)
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
         RaycastHit hit;
 
         // エフェクトを再生
         if (slashEffect != null)
         {
-            slashEffect.Play(); //
+            slashEffect.Play();
         }
+
+        // 攻撃が当たったかどうかの判定 (Rayの距離なども攻撃によって変えても良い)
         if (Physics.Raycast(ray, out hit, 100f))
         {
-
             Debug.Log("Rayが " + hit.collider.name + " に当たった！");
-            audioSource.PlayOneShot(attackSound);
+
+            if (audioSource != null && attackSound != null)
+                audioSource.PlayOneShot(attackSound);
 
             EnemyController enemy = hit.collider.GetComponent<EnemyController>();
             if (enemy != null)
             {
-                // PlayerStats が持っている攻撃力(attackPower)を使ってダメージを与える
-                enemy.TakeDamage(playerStats.CurrentAttack);
+                // 3. ダメージ計算
+                // プレイヤーの基本攻撃力 (装備補正込み) を取得
+                int baseAttackPower = playerStats.CurrentAttack;
+
+                // 基本攻撃力に、この攻撃の倍率を掛ける
+                // (int)でキャストして、最終的なダメージを整数にする
+                int finalDamage = (int)(baseAttackPower * damageMultiplier);
+
+                Debug.Log($"{triggerName} を実行！ 基本攻撃力: {baseAttackPower}, 倍率: {damageMultiplier}, 最終ダメージ: {finalDamage}");
+
+                // 4. 敵にダメージを与える
+                enemy.TakeDamage(finalDamage);
             }
         }
     }
-
+    
     // --- この OnAttack メソッドは PlayerInput システムを使っている場合の攻撃処理です。
     // --- Update内のマウス入力とどちらを使うか、後で統一する必要があります。
     public void OnAttack(UnityEngine.InputSystem.InputValue value)

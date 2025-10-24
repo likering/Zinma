@@ -1,4 +1,3 @@
-using System;          // TextMeshProを使うために必要
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -6,6 +5,9 @@ using UnityEngine.UI; // Imageを使うために必要
 
 public class UIManager : MonoBehaviour
 {
+    // ★★★ 1. シングルトンインスタンスを追加 ★★★
+    public static UIManager instance;
+
     // --- インスペクターから設定するUIパーツ ---
     public Image hpBarFill;
     public TextMeshProUGUI hpText;
@@ -27,25 +29,18 @@ public class UIManager : MonoBehaviour
     public CameraCotroller cameraController;
     public InventoryUI inventoryUI;
 
-
-    // 外部から呼び出されるHP更新用の関数
-    public void UpdateHpUIText(int currentLevel,int currentHp, int maxHp )
+    // ★★★ 2. Awakeメソッドを追加 ★★★
+    void Awake()
     {
-        // ↓ このログがコンソールに出るか確認
-        Debug.Log($"UI更新メソッド受信: 現在HP={currentHp}");
-
-        // HPバーの Fill Amount を更新 (HPを0～1の割合に変換)
-        hpBarFill.fillAmount = (float)currentHp / maxHp;
-
-        // HPテキストを更新
-        hpText.text = $"Lv: {currentLevel}  HP: {currentHp} / {maxHp}";
-    }
-    void Start()
-    {
-        // 最初はUIを非表示にしておく
-        if (equipmentPanel != null)
+        // シングルトンの設定
+        if (instance == null)
         {
-            equipmentPanel.SetActive(false);
+            instance = this;
+        }
+        else if (instance != this)
+        {
+            // 既にインスタンスが存在する場合は、重複しないように自分を破棄する
+            Destroy(gameObject);
         }
         playerStats = FindObjectOfType<PlayerStats>();
         if (playerStats != null)
@@ -55,6 +50,31 @@ public class UIManager : MonoBehaviour
             playerStats.OnStatusChanged += UpdateStatusUI;
         }
         statusPanel.SetActive(false); // 最初は非表示
+        
+    }
+    // 外部から呼び出されるHP更新用の関数
+    public void UpdateHpUI(int currentHp, int maxHp)
+    {
+        // HPバーの Fill Amount を更新
+        if (hpBarFill != null)
+            hpBarFill.fillAmount = (float)currentHp / maxHp;
+
+        // HPテキストを更新 (レベル表示が必要ならPlayerStatsから別途取得)
+        if (hpText != null && PlayerStats.instance != null)
+        {
+            // PlayerStatsがシングルトンなら PlayerStats.instance.currentLevel で取得できる
+            // そうでなければ、playerStats 変数から取得する
+            hpText.text = $"Lv: {playerStats.currentLevel}  HP: {currentHp} / {maxHp}";
+        }
+    }
+    void Start()
+    {
+        // 最初はUIを非表示にしておく
+        if (equipmentPanel != null)
+        {
+            equipmentPanel.SetActive(false);
+        }
+
     }
 
     void Update()
@@ -140,5 +160,5 @@ public class UIManager : MonoBehaviour
         cameraController.LockCursor();
     }
 
-    
+
 }

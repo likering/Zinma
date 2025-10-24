@@ -56,7 +56,7 @@ public class Inventory : MonoBehaviour
 
     void Start()
     {
-        playerStats = GetComponent<PlayerStats>();
+        playerStats = FindObjectOfType<PlayerStats>();
 
         // シーン内からPlayerEquipmentコンポーネントを探してきて、変数に格納する
         playerEquipment = FindObjectOfType<PlayerEquipment>();
@@ -100,35 +100,45 @@ public class Inventory : MonoBehaviour
 
             // 装備品だった場合、PlayerEquipmentに装備処理を依頼
             playerEquipment.Equip(equipment);
-            // ★ 装備音を再生
-            AudioManager.instance.PlaySE(AudioManager.instance.itemEquippedSound);
+
+            if (AudioManager.instance != null && AudioManager.instance.itemEquippedSound != null)
+            {
+                // ★ 装備音を再生
+                AudioManager.instance.PlaySE(AudioManager.instance.itemEquippedSound);
+            }
+
 
             // 装備したので、インベントリからアイテムを1つ減らす
             RemoveItem(item, 1);
         }
 
-        if (item.Type == ItemType.Potion)
+        else if (item.Type == ItemType.Potion)
         {
+            Debug.Log("このアイテムはポーションとして処理します。");
+
             // ポーションだった場合、プレイヤーのHPを回復
             playerStats.Heal(item.Power);
-            Debug.Log(item.ItemName + " を使ってHPが " + item.Power + " 回復した！");
-            uiManager.ShowMessage($"{item.ItemName} を使った！\nHPが {item.Power} 回復した！");
-            // ★ アイテム使用音を再生
-            AudioManager.instance.PlaySE(AudioManager.instance.itemUsedSound);
+
+            if (UIManager.instance != null)
+            {
+                // ★ UIManager.instance で直接呼び出す
+                UIManager.instance.ShowMessage($"{item.ItemName} を使った！\nHPが {item.Power} 回復した！");
+            }
+            // ★★★ 修正後 ★★★
+            // AudioManagerのインスタンスと、再生したいAudioClipの両方が存在するか確認
+
+            if (AudioManager.instance != null && AudioManager.instance.itemUsedSound != null)
+            {
+                AudioManager.instance.PlaySE(AudioManager.instance.itemUsedSound);
+            }
+
             RemoveItem(item, 1);
-
-
         }
         else
         {
-            // ★★★ デバッグ用のログを追加 ★★★
-            Debug.Log("このアイテムは EquipmentData ではありません。消費アイテムとして処理します。");
-
-            
+            Debug.Log(item.ItemName + " はここでは使えないアイテムです。");
         }
     }
-
-
     // 【追記4】インベントリから指定されたアイテムを減らすメソッド
     public void RemoveItem(ItemData item, int count = 1)
     {

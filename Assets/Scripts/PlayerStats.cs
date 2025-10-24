@@ -5,6 +5,9 @@ using System; // Actionを使うために必要
 
 public class PlayerStats : MonoBehaviour
 {
+    // ★★★ 1. シングルトンインスタンスを追加 ★★★
+    public static PlayerStats instance;
+
     [Header("レベルと経験値")]
     public int currentLevel = 1;
     public int currentExperience = 0;
@@ -23,7 +26,7 @@ public class PlayerStats : MonoBehaviour
     [Header("関連コンポーネント")]
     // PlayerEquipmentコンポーネントを保持しておく変数
     private PlayerEquipment playerEquipment;
-    private UIManager uiManager; // UIを更新するための参照
+    //private UIManager uiManager; // UIを更新するための参照
 
     // イベントの型を <現在のHP, 最大HP> に変更
     public UnityEvent<int, int> OnHealthChanged;
@@ -33,6 +36,16 @@ public class PlayerStats : MonoBehaviour
 
     void Awake()
     {
+        // ★★★ 2. シングルトンの設定を追加 ★★★
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+
         // 自分と同じGameObjectについているPlayerEquipmentを取得
         playerEquipment = GetComponent<PlayerEquipment>();
         // ゲーム開始時にステータスを初期計算
@@ -44,16 +57,10 @@ public class PlayerStats : MonoBehaviour
         // 現在のHPを最大値で初期化
         currentHp = maxHp;
 
-        // UIManagerを探して参照を保持
-        uiManager = FindObjectOfType<UIManager>();
-        if (uiManager != null)
-        {
-            // 開始時にUIを初期化
-            uiManager.UpdateHpUIText(currentLevel,currentHp, maxHp);
-            // uiManager.UpdateLevelUI(currentLevel); // レベル表示用のUIメソッドがあれば呼び出す
-        }
+        
 
-
+        // 開始時に一度だけUIを更新
+        NotifyHpUpdate();
     }
     public void Heal(int amount)
     {
@@ -71,28 +78,41 @@ public class PlayerStats : MonoBehaviour
         // HPが変更されたことをUIなどに通知する
         NotifyHpUpdate();
     }
+
+    // ★★★ ダメージ処理 (UI更新を一本化) ★★★
+    public void TakeDamage(int damage)
+    {
+        int actualDamage = Mathf.Max(1, damage - CurrentDefense); // 防御力を考慮する例
+
+        currentHp -= actualDamage;
+        if (currentHp < 0)
+        {
+            currentHp = 0;
+        }
+        Debug.Log("プレイヤーが " + actualDamage + " のダメージを受けた！ 残りHP: " + currentHp);
+        // 変更を通知
+        NotifyHpUpdate();
+
+        if (currentHp <= 0)
+        {
+            Die();
+        }
+    }
     // ステータスを再計算するメソッド
     public void UpdateStatus()
     {
-        // 装備の合計補正値を取得
-        int attackBonus = playerEquipment.GetTotalAttackBonus();
-        int defenseBonus = playerEquipment.GetTotalDefenseBonus();
+        int attackBonus = (playerEquipment != null) ? playerEquipment.GetTotalAttackBonus() : 0;
+        int defenseBonus = (playerEquipment != null) ? playerEquipment.GetTotalDefenseBonus() : 0;
 
-        // 基本値と装備補正を合計して最終的なステータスを計算
         CurrentAttack = attackPower + attackBonus;
         CurrentDefense = defensePower + defenseBonus;
-
         Debug.Log("ステータス更新: 攻撃力=" + CurrentAttack + ", 防御力=" + CurrentDefense);
 
-        // ★★★ 連携の核心 ★★★
-        // 計算が終わったら、イベントを発行してUIなどに通知
+        // ステータス全体の変更を通知
         OnStatusChanged?.Invoke();
 
-        // ★追記: ステータス更新時に最大HPに変動があったかもしれないのでHPを再評価
-        if (currentHp > maxHp)
-        {
-            currentHp = maxHp;
-        }
+        // HPにも影響がある可能性があるので、HPの通知も行う
+        if (currentHp > maxHp) currentHp = maxHp;
         NotifyHpUpdate();
     }
 
@@ -130,43 +150,28 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("最大HP: " + maxHp + ", 攻撃力: " + attackPower + ", 防御力: " + defensePower + "に上がった ");
 
         UpdateStatus();
-
-        // UIを更新
-        if (uiManager != null)
-        {
-            uiManager.UpdateHpUIText(currentLevel, currentHp, maxHp);
-            // uiManager.UpdateLevelUI(currentLevel); // レベル表示用のUIメソッドがあれば呼び出す
-        }
     }
-
-    // ダメージを受ける処理
-    public void TakeDamage(int damage)
+    // UIを更新
+    private void NotifyHpUpdate()
     {
-        // 防御力の計算などをここで行う
-        int actualDamage = damage; // - defensePower;
-        if (actualDamage < 1) actualDamage = 1;
-
-        currentHp -= actualDamage;
-        if (currentHp < 0) currentHp = 0;
-
-        Debug.Log("プレイヤーが " + actualDamage + " のダメージを受けた！ 残りHP: " + currentHp);
-
-        // ↓ このログがコンソールに出るか確認
-        Debug.Log($"HP変更イベント発行: 現在HP={currentHp}, 最大HP={maxHp}");
+        // 1. イベントを発行する (HPバーなど、他のスクリプトがこれを受け取る)
         OnHealthChanged.Invoke(currentHp, maxHp);
 
-
-        // UIを更新
-        if (uiManager != null)
+        // ★★★ 修正後 ★★★
+        // UIManager.instance で直接シングルトンを呼び出す
+        if (UIManager.instance != null)
         {
-            uiManager.UpdateHpUIText(currentLevel, currentHp, maxHp);
+            // UIManagerが要求する2つの引数を渡す
+            UIManager.instance.UpdateHpUI(this.currentHp, this.maxHp);
         }
-
-        if (currentHp <= 0)
+        else
         {
-            Die();
+            Debug.LogWarning("PlayerStats: UIManager.instance が見つかりません。");
         }
     }
+
+
+
 
     private void Die()
     {
@@ -174,18 +179,5 @@ public class PlayerStats : MonoBehaviour
         // ゲームオーバー処理
     }
 
-    /// </summary>
-    private void NotifyHpUpdate()
-    {
-        // イベントを発行して、HPバーなど他のオブジェクトに通知
-        OnHealthChanged.Invoke(currentHp, maxHp);
-
-        // UIManagerに直接UI更新を依頼
-        if (uiManager != null)
-        {
-            // UpdateHpUIText の引数が3つから2つになったと仮定
-            // もし引数が(レベル, 現在HP, 最大HP)のままなら、元の呼び出し方に戻してください
-            uiManager.UpdateHpUIText(currentLevel, currentHp, maxHp);
-        }
-    }
+    
 }
