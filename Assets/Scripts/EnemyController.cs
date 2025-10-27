@@ -26,6 +26,14 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private IDroppable dropTable; // この敵が使用するドロップテーブル
     [SerializeField] private GameObject droppedItemPrefab; // ステップ3で作成したプレハブ
 
+    private NavMeshAgent agent; // NavMeshAgentコンポーネントを格納する変数
+    private Transform playerTransform; // プレイヤーのTransformを格納する変数
+
+    [Header("攻撃設定")]
+    [SerializeField] private int attackPower = 10; // 敵の攻撃力
+    [SerializeField] private float attackCooldown = 2.0f; // 攻撃のクールダウンタイム（秒）
+    private bool canAttack = true; // 攻撃可能かどうかを判定するフラグ
+
 
     void Start()
     {
@@ -42,12 +50,31 @@ public class EnemyController : MonoBehaviour
         if (playerObj != null)
         {
             playerStats = playerObj.GetComponent<PlayerStats>();
+            // プレイヤーのTransformを取得して、追跡ターゲットに設定する
+            playerTransform = playerObj.transform;
+
         }
 
         // このゲームオブジェクトに付いている AudioSource コンポーネントを取得して、
         // audioSource 変数に代入する
         audioSource = GetComponent<AudioSource>();
 
+        // NavMeshAgentコンポーネントを取得
+        agent = GetComponent<NavMeshAgent>();
+        if (agent == null)
+        {
+            Debug.LogError("このGameObjectにNavMeshAgentがアタッチされていません: " + this.gameObject.name);
+        }
+
+    }
+
+    void Update()
+    {
+        // 死亡していない、かつプレイヤーが存在する場合、プレイヤーを追跡する
+        if (!isDead && agent != null && playerTransform != null)
+        {
+            agent.SetDestination(playerTransform.position);
+        }
     }
 
     // ダメージを受ける処理（簡略版）
@@ -64,6 +91,12 @@ public class EnemyController : MonoBehaviour
         enemyHP -= damage;
 
         Debug.Log(this.name + " が " + damage + " のダメージを受けた！ 残りHP: " + enemyHP);
+
+        // 追跡を一時停止
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+        }
 
         StartCoroutine(DamageFlash());
     }
@@ -98,6 +131,12 @@ public class EnemyController : MonoBehaviour
 
         }
         isDamage = false;
+
+        // 追跡を再開
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
     }
 
 
@@ -134,6 +173,32 @@ public class EnemyController : MonoBehaviour
                 //  実際にアイテムを生成してプレイヤーが拾えるようにする
             }
         }
+    }
+
+    // プレイヤーとの衝突判定
+    private void OnCollisionEnter(Collision collision)
+    {
+        // 攻撃可能状態で、衝突した相手がプレイヤーの場合
+        if (canAttack && collision.gameObject.CompareTag("Player"))
+        {
+            if (playerStats != null)
+            {
+                // プレイヤーにダメージを与える
+                playerStats.TakeDamage(attackPower);
+                Debug.Log(this.name + " の攻撃！ " + playerStats.name + " に " + attackPower + " のダメージ！");
+
+                // 攻撃クールダウンを開始
+                StartCoroutine(AttackCooldown());
+            }
+        }
+    }
+
+    // 攻撃のクールダウン処理
+    IEnumerator AttackCooldown()
+    {
+        canAttack = false; // 攻撃不可状態にする
+        yield return new WaitForSeconds(attackCooldown); // 指定秒数待機
+        canAttack = true; // 攻撃可能状態に戻す
     }
 
 }
