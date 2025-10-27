@@ -82,6 +82,11 @@ public class Inventory : MonoBehaviour
         }
         Debug.Log(item.ItemName + " を " + count + "個手に入れた。");
         // ★ 処理の最後にイベントを呼び出す
+        if (UIManager.instance != null)
+        {
+            // ★ UIManager.instance で直接呼び出す
+            UIManager.instance.ShowMessage($"{item.ItemName} を "+ count + "個手に入れた！");
+        }
         OnInventoryChanged?.Invoke();
     }
 

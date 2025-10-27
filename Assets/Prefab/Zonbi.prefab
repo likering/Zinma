@@ -32,7 +32,7 @@ Transform:
   m_GameObject: {fileID: 7524962498534871367}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.7600133, y: 1.5, z: 0.12752157}
+  m_LocalPosition: {x: 2.7600133, y: 1.2, z: 0.12752157}
   m_LocalScale: {x: 1.5, y: 1.5, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -255,6 +255,8 @@ MonoBehaviour:
   seDamage: {fileID: 8300000, guid: 7c47b20bb9874304a809dc5580d403ba, type: 3}
   seDeath: {fileID: 8300000, guid: a161527766be241efad062d931d302c5, type: 3}
   droppedItemPrefab: {fileID: 1000014188511100, guid: 5dcae5adf53292945adef517afe8041e, type: 3}
+  attackPower: 10
+  attackCooldown: 2
 --- !u!195 &2101808259536375835
 NavMeshAgent:
   m_ObjectHideFlags: 0

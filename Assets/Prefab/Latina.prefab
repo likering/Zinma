@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6612407821954914371}
   - component: {fileID: 5882655634265250117}
   - component: {fileID: 7466257770066074012}
+  - component: {fileID: 5817577082045623822}
   m_Layer: 6
   m_Name: Latina
   m_TagString: Enemy
@@ -32,7 +33,7 @@ Transform:
   m_GameObject: {fileID: 4723467760569045601}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -15.16, y: 2.09, z: 0}
+  m_LocalPosition: {x: -15.16, y: 1.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -133,6 +134,8 @@ MonoBehaviour:
   seDamage: {fileID: 8300000, guid: 7c47b20bb9874304a809dc5580d403ba, type: 3}
   seDeath: {fileID: 8300000, guid: a161527766be241efad062d931d302c5, type: 3}
   droppedItemPrefab: {fileID: 1000014188511100, guid: 5dcae5adf53292945adef517afe8041e, type: 3}
+  attackPower: 10
+  attackCooldown: 2
 --- !u!54 &6612407821954914371
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -279,6 +282,27 @@ NavMeshAgent:
   m_BaseOffset: 0.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!111 &5817577082045623822
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4723467760569045601}
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Animation: {fileID: 7400000, guid: 29d80fd75f9e1b1469bf529d29ec4084, type: 3}
+  m_Animations:
+  - {fileID: 7400000, guid: 29d80fd75f9e1b1469bf529d29ec4084, type: 3}
+  - {fileID: 7400000, guid: 29d80fd75f9e1b1469bf529d29ec4084, type: 3}
+  - {fileID: 7400000, guid: 29d80fd75f9e1b1469bf529d29ec4084, type: 3}
+  - {fileID: 7400000, guid: 29d80fd75f9e1b1469bf529d29ec4084, type: 3}
+  - {fileID: 7400000, guid: 29d80fd75f9e1b1469bf529d29ec4084, type: 3}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_UpdateMode: 0
+  m_CullingType: 1
 --- !u!1001 &4334176994251484620
 PrefabInstance:
   m_ObjectHideFlags: 0

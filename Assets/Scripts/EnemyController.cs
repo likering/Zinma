@@ -28,6 +28,7 @@ public class EnemyController : MonoBehaviour
 
     private NavMeshAgent agent; // NavMeshAgentコンポーネントを格納する変数
     private Transform playerTransform; // プレイヤーのTransformを格納する変数
+    private Animator animator; // ★ Animatorコンポーネントを格納する変数を追加
 
     [Header("攻撃設定")]
     [SerializeField] private int attackPower = 10; // 敵の攻撃力
@@ -66,6 +67,18 @@ public class EnemyController : MonoBehaviour
             Debug.LogError("このGameObjectにNavMeshAgentがアタッチされていません: " + this.gameObject.name);
         }
 
+        // ★ Animatorコンポーネントを取得
+        animator = GetComponent<Animator>();
+
+        if (agent == null)
+        {
+            Debug.LogError("このGameObjectにNavMeshAgentがアタッチされていません: " + this.gameObject.name);
+        }
+        // ★ Animatorの存在もチェック
+        if (animator == null)
+        {
+            Debug.LogError("このGameObjectにAnimatorがアタッチされていません: " + this.gameObject.name);
+        }
     }
 
     void Update()
@@ -86,6 +99,9 @@ public class EnemyController : MonoBehaviour
 
         // ダメージSEを再生
         audioSource.PlayOneShot(seDamage);
+
+        // ★ 'Damage'トリガーをセットして、ダメージアニメーションを再生
+        animator.SetTrigger("Damage");
 
         isDamage = true;
         enemyHP -= damage;
@@ -124,7 +140,10 @@ public class EnemyController : MonoBehaviour
             // 死亡処理を開始
             isDead = true; // 死亡状態にする（重要）
             audioSource.PlayOneShot(seDeath);
-            yield return new WaitForSeconds(1.0f);
+            // ★ 'Dead'をtrueにして、死亡アニメーションに遷移させる
+            animator.SetBool("Dead", true);
+
+            yield return new WaitForSeconds(3.0f);
 
             Die();
             yield break; // Dieの中でDestroyするので、このコルーチンはここで終わり

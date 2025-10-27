@@ -48,8 +48,9 @@ public class UIManager : MonoBehaviour
             // ★★★ 連携の核心 ★★★
             // PlayerStatsのステータスが更新されたら、UpdateStatusUIを呼ぶようにイベントを登録
             playerStats.OnStatusChanged += UpdateStatusUI;
+           
+
         }
-        statusPanel.SetActive(false); // 最初は非表示
         
     }
     // 外部から呼び出されるHP更新用の関数
@@ -74,6 +75,7 @@ public class UIManager : MonoBehaviour
         {
             equipmentPanel.SetActive(false);
         }
+        UpdateStatusUI(); // 表示する瞬間に必ず最新情報に更新
 
     }
 
@@ -90,16 +92,6 @@ public class UIManager : MonoBehaviour
             else
             {
                 OpenEquipmentUI();
-            }
-        }
-
-        // Cキーでステータスパネルの表示/非表示を切り替え
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            statusPanel.SetActive(!statusPanel.activeSelf);
-            if (statusPanel.activeSelf)
-            {
-                UpdateStatusUI(); // 表示する瞬間に必ず最新情報に更新
             }
         }
 
