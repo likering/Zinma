@@ -413,8 +413,8 @@ MonoBehaviour:
   seDamage: {fileID: 8300000, guid: 7c47b20bb9874304a809dc5580d403ba, type: 3}
   seDeath: {fileID: 8300000, guid: a161527766be241efad062d931d302c5, type: 3}
   droppedItemPrefab: {fileID: 1000014188511100, guid: 5dcae5adf53292945adef517afe8041e, type: 3}
-  attackPower: 10
-  attackCooldown: 2
+  attackPower: 50
+  attackCooldown: 1
 --- !u!54 &5085969335714891077
 Rigidbody:
   m_ObjectHideFlags: 0
