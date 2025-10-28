@@ -7,14 +7,13 @@ public class InventoryUI : MonoBehaviour
     public Inventory playerInventory; // InspectorからプレイヤーのInventoryを設定
 
     [Header("UIパーツ")]
-    public GameObject inventoryPanel;
+    public GameObject inventoryMenuGroup;
     public Transform itemContent; // アイテムボタンを並べる親オブジェクトScrollViewのContent
     public GameObject inventoryItemPrefab; // リストに並べるアイテムボタンのプレハブ
 
     public GameObject itemDetailPanel;
     public Image itemIcon;
     public TextMeshProUGUI itemNameText;
-    public TextMeshProUGUI itemDescriptionText;
 
     public GameObject commandPanel;
     public Button useButton;
@@ -61,24 +60,29 @@ public class InventoryUI : MonoBehaviour
     // インベントリUIを開く/閉じる処理 (以前作成したUIManagerなどから呼ばれる想定)
     public void ToggleInventory()
     {
-        inventoryPanel.SetActive(!inventoryPanel.activeSelf);
-        if (inventoryPanel.activeSelf)
+        inventoryMenuGroup.SetActive(!inventoryMenuGroup.activeSelf);
+        if (inventoryMenuGroup.activeSelf)
         {
             UpdateUI();
+
+            itemDetailPanel.SetActive(false);
+            commandPanel.SetActive(false);
+            selectedSlot = null;
         }
     }
 
     // UIのリストを更新する
     void UpdateUI()
-    {
-        // ★★★ デバッグログを追加 ★★★
-        Debug.Log("インベントリのアイテム数: " + playerInventory.items.Count);
-
-        // 既存のアイテムリストを一旦すべて削除
+    { // ★★★★★ 修正点 ★★★★★
+        // 1. 新しいUIを作る前に、古いUIをすべて削除する
         foreach (Transform child in itemContent)
         {
             Destroy(child.gameObject);
         }
+        // ★★★ デバッグログを追加 ★★★
+        Debug.Log("インベントリのアイテム数: " + playerInventory.items.Count);
+
+       
         // インベントリのアイテムスロットを元にリストを再生成
         foreach (InventorySlot slot in playerInventory.items)
         {
@@ -108,13 +112,17 @@ public class InventoryUI : MonoBehaviour
         selectedSlot = slot;
 
         // 詳細パネルやコマンドパネルを表示する処理
-        itemDetailPanel.SetActive(true);
+        //itemDetailPanel.SetActive(true);
         commandPanel.SetActive(true);
 
         // 詳細情報を更新
         itemNameText.text = slot.item.ItemName;
-        itemDescriptionText.text = slot.item.Description;
         itemIcon.sprite = slot.item.itemIcon;
+
+       
+            UIManager.instance.ShowMessage(slot.item.Description);
+        
+        
 
         // アイテムの種類に応じて「そうび」ボタンなどを表示/非表示にする
         bool isEquipment = (slot.item.Type == ItemType.Weapon || slot.item.Type == ItemType.Armor);

@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7830b6af9d7df24aa38c9fb807a446c, type: 3}
-  m_Name: "\u30BE\u30F3\u30D3"
+  m_Name: "\u30BE\u30F3\u30D3\uFF12"
   m_EditorClassIdentifier: 
-  monsterName: "\u30BE\u30F3\u30D3"
-  maxHp: 20
-  attackPower: 5
-  experiencePoint: 120
+  monsterName: "\u30BE\u30F3\u30D3\uFF12"
+  maxHp: 30
+  attackPower: 15
+  experiencePoint: 30
   lootTable:
-  - item: {fileID: 11400000, guid: 79ceacf34554cbf4aa6ec7251f124034, type: 2}
+  - item: {fileID: 0}
+    dropChance: 0
+  - item: {fileID: 11400000, guid: 74342855890834f4f807e5c04f1c2fa1, type: 2}
     dropChance: 100
-  - item: {fileID: 11400000, guid: 79ceacf34554cbf4aa6ec7251f124034, type: 2}
-    dropChance: 100
-  dropRate: 0.506
+  dropRate: 0

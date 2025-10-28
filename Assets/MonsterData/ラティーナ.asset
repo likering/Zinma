@@ -19,4 +19,6 @@ MonoBehaviour:
   lootTable:
   - item: {fileID: 11400000, guid: ad0c6b35bf908204c8f0b06a67d3d73a, type: 2}
     dropChance: 100
+  - item: {fileID: 11400000, guid: ad0c6b35bf908204c8f0b06a67d3d73a, type: 2}
+    dropChance: 100
   dropRate: 0.463
