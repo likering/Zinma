@@ -48,12 +48,13 @@ public class PlayerStats : MonoBehaviour
 
         // 自分と同じGameObjectについているPlayerEquipmentを取得
         playerEquipment = GetComponent<PlayerEquipment>();
-        // ゲーム開始時にステータスを初期計算
-        UpdateStatus();
+        
     }
 
     void Start()
     {
+        // ゲーム開始時にステータスを初期計算
+        UpdateStatus();
         // 現在のHPを最大値で初期化
         currentHp = maxHp;
 
@@ -90,6 +91,12 @@ public class PlayerStats : MonoBehaviour
             currentHp = 0;
         }
         Debug.Log("プレイヤーが " + actualDamage + " のダメージを受けた！ 残りHP: " + currentHp);
+
+        // UIManagerにダメージメッセージの表示を依頼
+        if (UIManager.instance != null)
+        {
+            UIManager.instance.ShowMessage($"{actualDamage} のダメージを受けた！");
+        }
         // 変更を通知
         NotifyHpUpdate();
 
@@ -148,9 +155,14 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log("レベルアップ！ レベル " + currentLevel + " になった！");
         Debug.Log("最大HP: " + maxHp + ", 攻撃力: " + attackPower + ", 防御力: " + defensePower + "に上がった ");
-
+        if (UIManager.instance != null)
+        {
+            UIManager.instance.ShowMessage($"レベルアップ！\nLv {currentLevel} になった！");
+            UIManager.instance.ShowMessage($"最大HP:が２０ , 攻撃力:が５ , 防御力:が１ ,上がった");
+        }
         UpdateStatus();
     }
+    
     // UIを更新
     private void NotifyHpUpdate()
     {

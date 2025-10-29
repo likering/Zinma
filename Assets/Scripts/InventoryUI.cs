@@ -57,7 +57,7 @@ public class InventoryUI : MonoBehaviour
         selectedSlot = null; // 選択状態をリセット
     }
 
-    // インベントリUIを開く/閉じる処理 (以前作成したUIManagerなどから呼ばれる想定)
+    // インベントリUIを開く/閉じる処理 
     public void ToggleInventory()
     {
         inventoryMenuGroup.SetActive(!inventoryMenuGroup.activeSelf);

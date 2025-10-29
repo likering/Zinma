@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Audio;
 
-public class EnemyController : MonoBehaviour
+public class BossController : MonoBehaviour
 {
     // ★ Inspectorから対応するモンスターのデータを設定
     public MonsterData monsterData;
@@ -122,11 +122,12 @@ public class EnemyController : MonoBehaviour
             {
                 agent.ResetPath();
             }
-            // 死亡していない、かつプレイヤーが存在する場合、プレイヤーを追跡する
-            if (!isDead && agent != null && playerTransform != null)
-
-                agent.SetDestination(playerTransform.position);
         }
+            // NavMeshAgentの現在の速度が0より大きいかどうかをAnimatorに伝える
+            // agent.velocity.magnitude は現在の移動速度
+            bool isMoving = agent.velocity.magnitude > 0.1f;
+            animator.SetBool("IsMoving", isMoving);
+        
     }
     void AttackPlayer()
     {
@@ -139,7 +140,7 @@ public class EnemyController : MonoBehaviour
             playerStats.TakeDamage(attackPower);
             Debug.Log(this.name + " の攻撃！ " + playerStats.name + " に " + attackPower + " のダメージ！");
 
-            // ★ 攻撃アニメーションを再生（トリガー名はAnimator Controllerに合わせてください）
+             //★ 攻撃アニメーションを再生（トリガー名はAnimator Controllerに合わせてください）
              animator.SetTrigger("Attack");
 
             // 攻撃クールダウンを開始
