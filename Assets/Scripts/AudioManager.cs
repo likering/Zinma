@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class AudioManager : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class AudioManager : MonoBehaviour
 
     // BGMのリストなどもここに追加できる
     // public AudioClip titleBGM;
-     public AudioClip fieldBGM;
+    public AudioClip fieldBGM;
     void Awake()
     {
         // シングルトンの設定
@@ -68,4 +69,39 @@ public class AudioManager : MonoBehaviour
         bgmAudioSource.Stop();
     }
 
+    public void CrossfadeBGM(AudioClip clip, float fadeDuration = 1.0f)
+    {
+        if (bgmAudioSource == null || clip == null || bgmAudioSource.clip == clip)
+        {
+            return; // オーディオソースがない、クリップがない、または同じ曲なら何もしない
+        }
+
+        // 既に実行中のフェード処理があれば停止し、新しいフェードを開始
+        StopAllCoroutines();
+        StartCoroutine(FadeMusic(clip, fadeDuration));
+    }
+
+    private IEnumerator FadeMusic(AudioClip newClip, float duration)
+    {
+        float startVolume = bgmAudioSource.volume;
+
+        // 現在の曲をフェードアウト
+        while (bgmAudioSource.volume > 0)
+        {
+            bgmAudioSource.volume -= startVolume * Time.deltaTime / duration;
+            yield return null;
+        }
+
+        // 新しい曲に差し替えて再生
+        bgmAudioSource.Stop();
+        bgmAudioSource.clip = newClip;
+        bgmAudioSource.Play();
+
+        // 新しい曲をフェードイン
+        while (bgmAudioSource.volume < startVolume)
+        {
+            bgmAudioSource.volume += startVolume * Time.deltaTime / duration;
+            yield return null;
+        }
+    }
 }
