@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "\u5143\u52C7\u8005"
   m_EditorClassIdentifier: 
   monsterName: "\u5143\u52C7\u8005"
-  maxHp: 2000
+  maxHp: 10
   attackPower: 300
   experiencePoint: 5000
   lootTable:

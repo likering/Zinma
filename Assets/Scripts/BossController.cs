@@ -4,6 +4,8 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement; // ★★★ 追加 ★★★ シーン遷移に必要
+
 
 public class BossController : MonoBehaviour
 {
@@ -25,6 +27,11 @@ public class BossController : MonoBehaviour
     [Header("ドロップ設定")]
     [SerializeField] private IDroppable dropTable; // この敵が使用するドロップテーブル
     [SerializeField] private GameObject droppedItemPrefab; // ステップ3で作成したプレハブ
+
+    [Header("エンディング設定")]
+    [SerializeField] private ItemData endingTriggerItem; // これを入手したらエンディングに進むアイテム
+    [SerializeField] private string endingScenesName = "EndingScenes"; // 遷移するエンディングシーン名
+    [SerializeField] private float timeToLoadEnding = 5.0f; // アイテム入手メッセージ表示後、シーン遷移までの待機時間
 
     private NavMeshAgent agent; // NavMeshAgentコンポーネントを格納する変数
     private Transform playerTransform; // プレイヤーのTransformを格納する変数
@@ -108,7 +115,7 @@ public class BossController : MonoBehaviour
             agent.SetDestination(playerTransform.position);
 
             // 2. プレイヤーが攻撃範囲内に入り、かつ攻撃可能状態か？
-            if (distanceToPlayer <= agent.stoppingDistance && canAttack)
+            if (distanceToPlayer <= attackRange && canAttack)
             {
                 // ここで攻撃処理を呼び出す
                 AttackPlayer();
@@ -201,56 +208,79 @@ public class BossController : MonoBehaviour
             // ★ 'Dead'をtrueにして、死亡アニメーションに遷移させる
             animator.SetBool("Dead", true);
 
-            yield return new WaitForSeconds(1.0f);
-
-            Die();
-            yield break; // Dieの中でDestroyするので、このコルーチンはここで終わり
-
+            // 死亡アニメーションや演出が終わるのを待ってから処理を進める
+            StartCoroutine(DieSequence());
+            yield break;
         }
-        isDamage = false;
+            isDamage = false;
 
-        // 追跡を再開
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.isStopped = false;
-        }
-    }
-
-
-    void Die()
-    {
-        // 1. プレイヤーに経験値を渡す
-        if (playerStats != null && monsterData != null)
-        {
-            playerStats.GainExperience(monsterData.experiencePoint);
-        }
-
-        // 2. アイテムドロップ処理
-        DropItems();
-
-        // 3. モンスター自身を消滅させる
-        Destroy(gameObject);
-    }
-
-    void DropItems()
-    {
-        // ドロップテーブル内の各アイテムについて、ドロップするかどうかを確率で判定
-        foreach (var lootItem in monsterData.lootTable)
-        {
-            float randomValue = Random.Range(0f, 100f);
-            if (randomValue <= lootItem.dropChance)
+            // 追跡を再開
+            if (agent != null && agent.isOnNavMesh)
             {
-                // ★ アイテムをシーン上に生成する（別途ドロップアイテム用のPrefabが必要）
-                // プレハブから新しいGameObjectを生成
-                GameObject itemObject = Instantiate(droppedItemPrefab, transform.position, Quaternion.identity);
-
-                // 生成したオブジェクトのスクリプトを取得し、アイテム情報を設定する
-                itemObject.GetComponent<DroppedItemController>().Initialize(lootItem.item);
-                Debug.Log(lootItem.item.ItemName + " をドロップしました！");
-                //  実際にアイテムを生成してプレイヤーが拾えるようにする
+                agent.isStopped = false;
             }
-        }
+        
     }
+        IEnumerator DieSequence()
+        {
+            // ナビゲーションを停止
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.isStopped = true;
+            }
+
+            // 死亡アニメーションが終わるのを少し待つ（時間はアニメーションに合わせて調整）
+            yield return new WaitForSeconds(2.0f);
+
+            // 1. プレイヤーに経験値を渡す
+            if (playerStats != null && monsterData != null)
+            {
+                playerStats.GainExperience(monsterData.experiencePoint);
+            }
+
+            // 2. アイテムドロップ処理とエンディング判定
+            bool endingItemDropped = DropItemsAndCheckForEnding();
+
+            // 3. エンディングアイテムがドロップした場合
+            if (endingItemDropped)
+            {
+                Debug.Log("エンディング条件達成！");
+                // （任意）ここでクリアメッセージを表示するなどの演出を追加できる
+
+                // 指定時間待ってからエンディングシーンに遷移
+                yield return new WaitForSeconds(timeToLoadEnding);
+                SceneManager.LoadScene(endingScenesName);
+            }
+
+            // 4. モンスター自身を消滅させる（エンディングに行かない場合も消える）
+            Destroy(gameObject);
+        }
+
+        bool DropItemsAndCheckForEnding()
+        {
+            bool isEndingTriggered = false;
+
+            foreach (var lootItem in monsterData.lootTable)
+            {
+                float randomValue = Random.Range(0f, 100f);
+                if (randomValue <= lootItem.dropChance)
+                {
+                    GameObject itemObject = Instantiate(droppedItemPrefab, transform.position, Quaternion.identity);
+                    itemObject.GetComponent<DroppedItemController>().Initialize(lootItem.item);
+                    Debug.Log(lootItem.item.ItemName + " をドロップしました！");
+
+                    // ドロップしたアイテムがエンディング用のアイテムかチェック
+                    if (lootItem.item == endingTriggerItem)
+                    {
+                        isEndingTriggered = true;
+                    }
+                }
+            }
+            return isEndingTriggered;
+        }
+
+      
+    
 
     // 攻撃のクールダウン処理
     IEnumerator AttackCooldown()

@@ -133,35 +133,47 @@ public class PlayerController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
         RaycastHit hit;
 
-        // エフェクトを再生
-        if (slashEffect != null)
-        {
-            slashEffect.Play();
-        }
-
+       
         // 攻撃が当たったかどうかの判定 (Rayの距離なども攻撃によって変えても良い)
         if (Physics.Raycast(ray, out hit, 100f))
         {
+            // ヒットエフェクトが設定されていれば、ヒットした位置に生成する
+            if (slashEffect != null)
+            {
+                // hit.point はRayが当たった正確な位置
+                // hit.normal は当たった面の法線ベクトル（エフェクトが壁に沿って出るように）
+                Instantiate(slashEffect, hit.point, Quaternion.LookRotation(hit.normal));
+            }
             Debug.Log("Rayが " + hit.collider.name + " に当たった！");
 
             if (audioSource != null && attackSound != null)
                 audioSource.PlayOneShot(attackSound);
 
+            // まず、当たった相手が通常の敵か試す
             EnemyController enemy = hit.collider.GetComponent<EnemyController>();
             if (enemy != null)
             {
-                // 3. ダメージ計算
-                // プレイヤーの基本攻撃力 (装備補正込み) を取得
+                // ダメージ計算
                 int baseAttackPower = playerStats.CurrentAttack;
-
-                // 基本攻撃力に、この攻撃の倍率を掛ける
-                // (int)でキャストして、最終的なダメージを整数にする
                 int finalDamage = (int)(baseAttackPower * damageMultiplier);
+                Debug.Log($"[Enemy] {triggerName} を実行！ 最終ダメージ: {finalDamage}");
 
-                Debug.Log($"{triggerName} を実行！ 基本攻撃力: {baseAttackPower}, 倍率: {damageMultiplier}, 最終ダメージ: {finalDamage}");
-
-                // 4. 敵にダメージを与える
+                // 通常の敵にダメージを与える
                 enemy.TakeDamage(finalDamage);
+                return; // 敵にダメージを与えたので、この後の処理は不要
+            }
+
+            // もし通常の敵でなければ、ボスかどうかを試す
+            BossController boss = hit.collider.GetComponent<BossController>();
+            if (boss != null)
+            {
+                // ダメージ計算
+                int baseAttackPower = playerStats.CurrentAttack;
+                int finalDamage = (int)(baseAttackPower * damageMultiplier);
+                Debug.Log($"[Boss] {triggerName} を実行！ 最終ダメージ: {finalDamage}");
+
+                // ボスにダメージを与える
+                boss.TakeDamage(finalDamage);
             }
         }
     }
