@@ -38,6 +38,12 @@ public class DroppedItemController : MonoBehaviour
                 Debug.Log(itemData.ItemName + " を拾った！");
 
                 StartCoroutine(PickupSequence());
+
+                if (itemData != null && itemData.isEndingTrigger) //拾ったアイテムがエンディングトリガーなら
+                {
+                    GameManager.Instance.PlayerCollectedEndingItem();
+                }
+
             }
             else
             {

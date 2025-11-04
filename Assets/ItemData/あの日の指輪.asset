@@ -19,6 +19,7 @@ MonoBehaviour:
   power: 0
   hpRecoveryAmount: 0
   price: 0
+  isEndingTrigger: 1
   equipSlot: 0
   attackPower: 0
   defensePower: 0

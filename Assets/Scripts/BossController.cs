@@ -4,7 +4,6 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Audio;
-using UnityEngine.SceneManagement; // ★★★ 追加 ★★★ シーン遷移に必要
 
 
 public class BossController : MonoBehaviour
@@ -28,16 +27,11 @@ public class BossController : MonoBehaviour
     [SerializeField] private IDroppable dropTable; // この敵が使用するドロップテーブル
     [SerializeField] private GameObject droppedItemPrefab; // ステップ3で作成したプレハブ
 
-    [Header("エンディング設定")]
-    [SerializeField] private ItemData endingTriggerItem; // これを入手したらエンディングに進むアイテム
-    [SerializeField] private string endingScenesName = "EndingScenes"; // 遷移するエンディングシーン名
-    [SerializeField] private float timeToLoadEnding = 5.0f; // アイテム入手メッセージ表示後、シーン遷移までの待機時間
-
     private NavMeshAgent agent; // NavMeshAgentコンポーネントを格納する変数
     private Transform playerTransform; // プレイヤーのTransformを格納する変数
     private Animator animator; // ★ Animatorコンポーネントを格納する変数を追加
 
-    [Header("AI設定")] // ★★★ 変更点1：新しい変数を追加 ★★★
+    [Header("AI設定")] 
     [SerializeField] private float detectionRange = 15f; // プレイヤーを検知する範囲
     [SerializeField] private float attackRange = 2f;    // 攻撃するために停止する距離
 
@@ -100,7 +94,6 @@ public class BossController : MonoBehaviour
 
     void Update()
     {
-        // ★★★ 変更点3：Updateのロジックを全面的に変更 ★★★
 
         // 死亡している、またはプレイヤーが見つからない場合は何もしない
         if (isDead || playerTransform == null || agent == null) return;
@@ -232,52 +225,33 @@ public class BossController : MonoBehaviour
             // 死亡アニメーションが終わるのを少し待つ（時間はアニメーションに合わせて調整）
             yield return new WaitForSeconds(2.0f);
 
-            // 1. プレイヤーに経験値を渡す
+            //  プレイヤーに経験値を渡す
             if (playerStats != null && monsterData != null)
             {
                 playerStats.GainExperience(monsterData.experiencePoint);
             }
+        DropItems();
 
-            // 2. アイテムドロップ処理とエンディング判定
-            bool endingItemDropped = DropItemsAndCheckForEnding();
-
-            // 3. エンディングアイテムがドロップした場合
-            if (endingItemDropped)
-            {
-                Debug.Log("エンディング条件達成！");
-                // （任意）ここでクリアメッセージを表示するなどの演出を追加できる
-
-                // 指定時間待ってからエンディングシーンに遷移
-                yield return new WaitForSeconds(timeToLoadEnding);
-                SceneManager.LoadScene(endingScenesName);
-            }
-
-            // 4. モンスター自身を消滅させる（エンディングに行かない場合も消える）
-            Destroy(gameObject);
+        //  モンスター自身を消滅させる
+        Destroy(gameObject);
         }
 
-        bool DropItemsAndCheckForEnding()
+    void DropItems()
+    {
+
+        foreach (var lootItem in monsterData.lootTable)
         {
-            bool isEndingTriggered = false;
-
-            foreach (var lootItem in monsterData.lootTable)
+            float randomValue = Random.Range(0f, 100f);
+            if (randomValue <= lootItem.dropChance)
             {
-                float randomValue = Random.Range(0f, 100f);
-                if (randomValue <= lootItem.dropChance)
-                {
-                    GameObject itemObject = Instantiate(droppedItemPrefab, transform.position, Quaternion.identity);
-                    itemObject.GetComponent<DroppedItemController>().Initialize(lootItem.item);
-                    Debug.Log(lootItem.item.ItemName + " をドロップしました！");
+                GameObject itemObject = Instantiate(droppedItemPrefab, transform.position, Quaternion.identity);
+                itemObject.GetComponent<DroppedItemController>().Initialize(lootItem.item);
+                Debug.Log(lootItem.item.ItemName + " をドロップしました！");
 
-                    // ドロップしたアイテムがエンディング用のアイテムかチェック
-                    if (lootItem.item == endingTriggerItem)
-                    {
-                        isEndingTriggered = true;
-                    }
-                }
+                UIManager.instance.ShowMessage("あれは、、、");
             }
-            return isEndingTriggered;
         }
+    }
 
       
     
@@ -290,7 +264,7 @@ public class BossController : MonoBehaviour
         canAttack = true; // 攻撃可能状態に戻す
     }
 
-    // ★★★ ボーナス：索敵範囲と攻撃範囲をシーンビューで可視化する ★★★
+    // ：索敵範囲と攻撃範囲をシーンビューで可視化する 
     private void OnDrawGizmosSelected()
     {
         // 索敵範囲を青いワイヤーフレームで表示

@@ -12,11 +12,7 @@ public class ScenarioManager : MonoBehaviour
     // 表示するシナリオの全文をここに記述
     [SerializeField, TextArea(3, 10)]
     private string[] scenarios = {
-        "目を覚ますと、そこは見知らぬ森の中だった...",
-        "「ここは...どこだ？」",
-        "遠くから、微かに何かの声が聞こえる。",
-        "...",
-        "冒険が、今始まる。"
+       
     };
 
     private int currentLine = 0; // 現在表示しているシナリオの行番号

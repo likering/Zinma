@@ -20,6 +20,7 @@ public class ItemData : ScriptableObject
     [SerializeField] private int power;               // 効果量（攻撃力や回復量など）
     [SerializeField] public int hpRecoveryAmount; // HP回復量 (消費アイテムの場合)
     [SerializeField] private int price;               // 価格
+    [SerializeField] public bool isEndingTrigger = false; // このアイテムがエンディングをトリガーするかどうか
 
     // ゲッター（外部から値を取得するためのプロパティ）
     public string ItemName => itemName;
